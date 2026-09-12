@@ -19,4 +19,6 @@ venv/
 .DS_Store
 Thumbs.db
 
+#vlad 20260912
 .env
+.pytest_cache/
