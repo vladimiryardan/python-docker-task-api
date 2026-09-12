@@ -1,0 +1,37 @@
+{
+  "family": "python-docker-task-api",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::789655958476:role/python-docker-task-api-execution-role",
+  "containerDefinitions": [
+    {
+      "name": "task-api",
+      "image": "789655958476.dkr.ecr.ap-northeast-1.amazonaws.com/python-docker-task-api:latest",
+      "essential": true,
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "secrets": [
+        {
+          "name": "DATABASE_URL",
+          "valueFrom": "arn:aws:secretsmanager:ap-northeast-1:789655958476:secret:python-docker-task-api/database-url-44pRJg"
+        }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/python-docker-task-api",
+          "awslogs-region": "ap-northeast-1",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ]
+}
