@@ -1,11 +1,12 @@
 from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.database import Base, SessionLocal, engine
+#from app.database import Base, SessionLocal, engine
+from app.database import SessionLocal
+
 from app.models import Task
 from app.schemas import TaskCreate, TaskResponse, TaskUpdate
 
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Task API",
