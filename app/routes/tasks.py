@@ -5,6 +5,7 @@ from app.dependencies import get_db
 from app.models import Task
 from app.schemas import TaskCreate, TaskResponse, TaskUpdate
 
+from app.services import tasks as task_service
 
 router = APIRouter(
     prefix="/tasks",
@@ -14,7 +15,7 @@ router = APIRouter(
 
 @router.get("", response_model=list[TaskResponse])
 def get_tasks(db: Session = Depends(get_db)):
-    return db.query(Task).all()
+    return task_service.get_tasks(db)
 
 
 @router.post(
@@ -23,16 +24,7 @@ def get_tasks(db: Session = Depends(get_db)):
     status_code=status.HTTP_201_CREATED,
 )
 def create_task(task: TaskCreate, db: Session = Depends(get_db)):
-    new_task = Task(
-        title=task.title,
-        completed=task.completed,
-    )
-
-    db.add(new_task)
-    db.commit()
-    db.refresh(new_task)
-
-    return new_task
+    return task_service.create_task(db, task)
 
 
 @router.patch("/{task_id}", response_model=TaskResponse)
@@ -41,7 +33,7 @@ def update_task(
     task: TaskUpdate,
     db: Session = Depends(get_db),
 ):
-    existing_task = db.query(Task).filter(Task.id == task_id).first()
+    existing_task = task_service.get_task_by_id(db, task_id)
 
     if existing_task is None:
         raise HTTPException(
@@ -49,16 +41,7 @@ def update_task(
             detail="Task not found",
         )
 
-    if task.title is not None:
-        existing_task.title = task.title
-
-    if task.completed is not None:
-        existing_task.completed = task.completed
-
-    db.commit()
-    db.refresh(existing_task)
-
-    return existing_task
+    return task_service.update_task(db, existing_task, task)
 
 
 @router.delete(
@@ -66,7 +49,7 @@ def update_task(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete_task(task_id: int, db: Session = Depends(get_db)):
-    existing_task = db.query(Task).filter(Task.id == task_id).first()
+    existing_task = task_service.get_task_by_id(db, task_id)
 
     if existing_task is None:
         raise HTTPException(
@@ -74,5 +57,4 @@ def delete_task(task_id: int, db: Session = Depends(get_db)):
             detail="Task not found",
         )
 
-    db.delete(existing_task)
-    db.commit()
+    task_service.delete_task(db, existing_task)
